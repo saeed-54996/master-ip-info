@@ -18,6 +18,12 @@ function cleanOldCache($cacheDir) {
     }
 }
 
+// Helper to normalize whitespace and trim
+function clean($str) {
+    // replace all whitespace sequences with a single space, then trim ends
+    return trim(preg_replace('/\s+/', ' ', $str));
+}
+
 // Execute cleanup on script start
 cleanOldCache($cacheDir);
 
@@ -74,22 +80,21 @@ if (!$html) {
     exit;
 }
 
-// Example of parsing specific data - customize as needed
+// Parse and clean specific data
 $parsedData = [];
 foreach ($html->find('.ipinfo-item.mb-3') as $table) {
-    $source = [
-        'Name' => $table->find('strong', 0)->plaintext,
-        'ip-range' => $table->find('.break-all', 2)->plaintext,
-        'isp' => $table->find('.break-all', 3)->plaintext,
-        'org' => $table->find('.break-all', 4)->plaintext,
-        'country' => $table->find('.break-words', 0)->plaintext,
-        'region' => $table->find('.break-all', 5)->plaintext,
-        'city' => $table->find('.break-all', 6)->plaintext,
-        'time-zone' => $table->find('.break-all', 7)->plaintext,
-        'local-time' => $table->find('.break-words', 1)->plaintext,
-        'postal-code' => $table->find('.break-all', 8)->plaintext,
+    $parsedData[] = [
+        'Name'        => clean($table->find('strong', 0)->plaintext),
+        'ip-range'    => clean($table->find('.break-all', 2)->plaintext),
+        'isp'         => clean($table->find('.break-all', 3)->plaintext),
+        'org'         => clean($table->find('.break-all', 4)->plaintext),
+        'country'     => clean($table->find('.break-words', 0)->plaintext),
+        'region'      => clean($table->find('.break-all', 5)->plaintext),
+        'city'        => clean($table->find('.break-all', 6)->plaintext),
+        'time-zone'   => clean($table->find('.break-all', 7)->plaintext),
+        'local-time'  => clean($table->find('.break-words', 1)->plaintext),
+        'postal-code' => clean($table->find('.break-all', 8)->plaintext),
     ];
-    $parsedData[] = $source;
 }
 
 echo json_encode(['ok' => true, 'data' => $parsedData]);
